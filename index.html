@@ -1,109 +1,103 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="table.js"></script>
-        <script src="jquery-2.2.3.js"></script>
-        <link href="c3.css" rel="stylesheet" type="text/css">
-        <script src="d3.min.js" charset="utf-8"></script>
-        <script src="c3.min.js"></script>
-        <script src="interact.min.js"></script>
-        <title>JSON Table</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <p>
-        <div id="chart" class="draggable"></div>
-        <script>
-            var chart = c3.generate({
-                bindto: '#chart',
-                data: {
-                  x: 'millis',
-                  url: 'http://localhost:3001/data/voltage'
-                }
-            });
-            
-            setInterval(function () {
-                chart.load({
-                    url: 'http://localhost:3001/data/voltage'
-                });
-            }, 1000);
-        //document.body.appendChild(buildHtmlTable([{"speed":"5","velocity":"7","within":"true"}]));
-            
-        $.getJSON("http://localhost:3001/data",function(data){
-            var myJson = JSON.parse(data);
-            document.body.appendChild(buildHtmlTable([myJson.test]));
-            //alert(JSON.stringify(parseFloat(myJson.test.speed) + parseFloat(myJson.test.angle)));
-        });
-                  
-        </script>     
-    
-        <script>
-        // target elements with the "draggable" class
-            interact('.draggable')
-              .draggable({
-                // enable inertial throwing
-                inertia: true,
-                // keep the element within the area of it's parent
-                restrict: {
-                  endOnly: true,
-                  elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-                },
-                // enable autoScroll
-                autoScroll: true,
+	<head>
+		<script src="table.js"></script>
+		<script src="jquery-2.2.3.js"></script>
+		<link href="c3.css" rel="stylesheet" type="text/css">
+		<script src="d3.min.js" charset="utf-8"></script>
+		<script src="c3.min.js"></script>
+		<script src="interact.min.js"></script>
+		<title>JSON Table</title>
+		<link rel="stylesheet" href="styles.css">
+	</head>
+	<p>
+		<div id="chart" class="draggable"></div>
+		<script>
+			var chart = c3.generate({
+				bindto: '#chart',
+				data: {
+				  x: 'millis',
+				  url: 'http://localhost:3001/data/voltage'
+				}
+			});
 
-                // call this function on every dragmove event
-                onmove: dragMoveListener,
-                // call this function on every dragend event
-                onend: function (event) {
-                  var textEl = event.target.querySelector('p');
+			setInterval(function () {
+				chart.load({
+					url: 'http://localhost:3001/data/voltage'
+				});
+			}, 1000);
+		//document.body.appendChild(buildHtmlTable([{"speed":"5","velocity":"7","within":"true"}]));
 
-                  textEl && (textEl.textContent =
-                    'moved a distance of '
-                    + (Math.sqrt(event.dx * event.dx +
-                                 event.dy * event.dy)|0) + 'px');
-                }
-              })
-            .resizable({
-                preserveAspectRatio: false,
-                edges: { left: true, right: true, bottom: true, top: true }
-              })
-              .on('resizemove', function (event) {
-                var target = event.target,
-                    x = (parseFloat(target.getAttribute('data-x')) || 0),
-                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+		$.getJSON("http://localhost:3001/data",function(data){
+			var myJson = JSON.parse(data);
+			document.body.appendChild(buildHtmlTable([myJson.test]));
+			//alert(JSON.stringify(parseFloat(myJson.test.speed) + parseFloat(myJson.test.angle)));
+		});
 
-                // update the element's style
-                target.style.width  = event.rect.width + 'px';
-                target.style.height = event.rect.height + 'px';
+		</script>
 
-                // translate when resizing from top or left edges
-                x += event.deltaRect.left;
-                y += event.deltaRect.top;
+		<script>
 
-                target.style.webkitTransform = target.style.transform =
-                    'translate(' + x + 'px,' + y + 'px)';
+		//	ADVICE: Upon further research, C3 is cool and the best library for this application.
 
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
-              });
+		// target elements with the "draggable" class
+			interact('.draggable')
+				.draggable({
+					inertia: true,          // enable inertial throwing
+					restrict: {             // keep the element within the area of it's parent
+						endOnly: true,
+						elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+					},
+					autoScroll: true,       // enable autoScroll
+					onmove: dragMoveListener,      // call this function on every dragmove event
+					onend: function (event) {
+						var textEl = event.target.querySelector('p');
 
-              function dragMoveListener (event) {
-                var target = event.target,
-                    // keep the dragged position in the data-x/data-y attributes
-                    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-                    y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+						textEl && (textEl.textContent = 'moved a distance of ' + (Math.sqrt(event.dx * event.dx + event.dy * event.dy)|0) + 'px');
+					}
+				})
+				.resizable({
+					preserveAspectRatio: false,
+					edges: { left: true, right: true, bottom: true, top: true }
+				})
+				.on('resizemove', function (event) {
+					var target = event.target,
+						x = (parseFloat(target.getAttribute('data-x')) || 0),
+						y = (parseFloat(target.getAttribute('data-y')) || 0);
 
-                // translate the element
-                target.style.webkitTransform =
-                target.style.transform =
-                  'translate(' + x + 'px, ' + y + 'px)';
+					// update the element's style
+					target.style.width  = event.rect.width + 'px';
+					target.style.height = event.rect.height + 'px';
 
-                // update the posiion attributes
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
-              }
+					// translate when resizing from top or left edges
+					x += event.deltaRect.left;
+					y += event.deltaRect.top;
 
-              // this is used later in the resizing and gesture demos
-              window.dragMoveListener = dragMoveListener;
-        </script>
-    </p>
+					target.style.webkitTransform = target.style.transform =
+						'translate(' + x + 'px,' + y + 'px)';
+
+					target.setAttribute('data-x', x);
+					target.setAttribute('data-y', y);
+				});
+
+			function dragMoveListener (event) {
+				var target = event.target,
+					// keep the dragged position in the data-x/data-y attributes
+					x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+					y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+				// translate the element
+				target.style.webkitTransform =
+				target.style.transform =
+					'translate(' + x + 'px, ' + y + 'px)';
+
+				// update the posiion attributes
+				target.setAttribute('data-x', x);
+				target.setAttribute('data-y', y);
+			}
+
+			  // this is used later in the resizing and gesture demos
+			window.dragMoveListener = dragMoveListener;
+		</script>
+	</p>
 </html>
