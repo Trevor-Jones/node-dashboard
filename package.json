@@ -1,7 +1,7 @@
 {
-  "name": "tutorial",
+  "name": "node-dashboard",
   "version": "0.0.1",
-  "description": "learning to use node.js",
+  "description": "Information dashboard for the FRC RoboRIO",
   "dependencies": {
     "c3": "^0.4.11-rc4",
     "express": "^4.13.4",
