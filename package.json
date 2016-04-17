@@ -1,0 +1,12 @@
+{
+  "name": "tutorial",
+  "version": "0.0.1",
+  "description": "learning to use node.js",
+  "dependencies": {
+    "c3": "^0.4.11-rc4",
+    "express": "^4.13.4",
+    "jsonfile": "^2.3.0",
+    "xml2js": "^0.4.16",
+    "ya-csv": "^0.9.4"
+  }
+}
