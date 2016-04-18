@@ -7,97 +7,50 @@
 		<script src="d3.min.js" charset="utf-8"></script>
 		<script src="c3.min.js"></script>
 		<script src="interact.min.js"></script>
+        <script src="socket.io.js"></script>
+        <script src="graph.js"></script>
 		<title>JSON Table</title>
 		<link rel="stylesheet" href="styles.css">
 	</head>
 	<p>
 		<div id="chart" class="draggable"></div>
-		<script>
+        <script>
+            var myJson;
+            
+            var socket = io.connect('http://localhost:3002');
+            socket.on('json', function (data) {
+                socket.emit('request', 'received');
+                myJson = data.values;
+                document.write(JSON.stringify(myJson));
+            });
+            
 			var chart = c3.generate({
-				bindto: '#chart',
+                bindto: '#chart',
 				data: {
-				  x: 'millis',
-				  url: 'http://localhost:3001/data/voltage'
+                    json: myJson,
+                    keys: {
+                        value: ['millis', 'velocity']
+                    }
 				}
 			});
 
 			setInterval(function () {
 				chart.load({
-					url: 'http://localhost:3001/data/voltage'
+                    json: myJson
 				});
 			}, 1000);
-		//document.body.appendChild(buildHtmlTable([{"speed":"5","velocity":"7","within":"true"}]));
-
-		$.getJSON("http://localhost:3001/data",function(data){
-			var myJson = JSON.parse(data);
-			document.body.appendChild(buildHtmlTable([myJson.test]));
-			//alert(JSON.stringify(parseFloat(myJson.test.speed) + parseFloat(myJson.test.angle)));
-		});
-
 		</script>
 
 		<script>
-
-		//	ADVICE: Upon further research, C3 is cool and the best library for this application.
-
-		// target elements with the "draggable" class
-			interact('.draggable')
-				.draggable({
-					inertia: true,          // enable inertial throwing
-					restrict: {             // keep the element within the area of it's parent
-						endOnly: true,
-						elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-					},
-					autoScroll: true,       // enable autoScroll
-					onmove: dragMoveListener,      // call this function on every dragmove event
-					onend: function (event) {
-						var textEl = event.target.querySelector('p');
-
-						textEl && (textEl.textContent = 'moved a distance of ' + (Math.sqrt(event.dx * event.dx + event.dy * event.dy)|0) + 'px');
-					}
-				})
-				.resizable({
-					preserveAspectRatio: false,
-					edges: { left: true, right: true, bottom: true, top: true }
-				})
-				.on('resizemove', function (event) {
-					var target = event.target,
-						x = (parseFloat(target.getAttribute('data-x')) || 0),
-						y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-					// update the element's style
-					target.style.width  = event.rect.width + 'px';
-					target.style.height = event.rect.height + 'px';
-
-					// translate when resizing from top or left edges
-					x += event.deltaRect.left;
-					y += event.deltaRect.top;
-
-					target.style.webkitTransform = target.style.transform =
-						'translate(' + x + 'px,' + y + 'px)';
-
-					target.setAttribute('data-x', x);
-					target.setAttribute('data-y', y);
-				});
-
-			function dragMoveListener (event) {
-				var target = event.target,
-					// keep the dragged position in the data-x/data-y attributes
-					x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-					y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-				// translate the element
-				target.style.webkitTransform =
-				target.style.transform =
-					'translate(' + x + 'px, ' + y + 'px)';
-
-				// update the posiion attributes
-				target.setAttribute('data-x', x);
-				target.setAttribute('data-y', y);
-			}
-
-			  // this is used later in the resizing and gesture demos
-			window.dragMoveListener = dragMoveListener;
+			interact('.draggable').draggable({
+                inertia: false,         
+                restrict: {             
+                    endOnly: true,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                },
+                autoScroll: true,     
+                onmove: dragMoveListener,   
+            });
 		</script>
 	</p>
 </html>

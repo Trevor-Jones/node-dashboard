@@ -2,77 +2,70 @@ var net = require('net');
 var xml2js = require('xml2js');
 var express = require('express');
 var app = express();
-var jsonfile = require('jsonfile');
 var fs = require('fs');
 var csv = require('ya-csv');
 var path = require('path');
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
-var timeMillis = new Date().getTime();
+var jsonObj = JSON.parse('{ "values" : []}');
 
-var voltageCsv = path.join(__dirname, '/logs/voltage/', timeMillis.toString() + '.csv');
-console.log(voltageCsv);
-var csvFileWriter = csv.createCsvFileWriter(voltageCsv);
-var voltage = [];
-voltage[0] = 'voltage';
-voltage[1] = 'millis';
-csvFileWriter.writeRecord(voltage);
-
-var HOST = 'localhost'; // parameterize the IP of the Listen
-var PORT = 3000; // TCP LISTEN port
+if(process.argv.length > 2) {
+    var HOST = process.argv[2];
+}
+else {
+    var HOST = 'localhost';
+}
+var PORT = 3000;
 
 var myJson;
-var jsonFile = __dirname + '/tmp/data.json';
 var values;
 var properties = [];
+
+var newData = true;
 
 var parser = new xml2js.Parser({explicitArray : false});
 
 app.use(express.static('public'));
-// Create an instance of the Server and waits for a conexão
+
+server.listen(3002);
+
+io.on('connection', function (socket) {
+    socket.emit('json', jsonObj);
+    socket.on('request', function (data) {
+        socket.emit('json', jsonObj);
+    });
+});
+
 net.createServer(function(sock) {
-
-
-	// Receives a connection - a socket object is associated to the connection automatically
 	console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
-
-
-	// Add a 'data' - "event handler" in this socket instance
 	sock.on('data', function(data) {
-		// data was received in the socket
-		// Writes the received message back to the socket (echo)
-			console.log(data.toString('ascii'));
-			parser.parseString(data, function (err, result) {
-				myJson = (JSON.stringify(result));
-				console.log(JSON.stringify(result, null, 2));
-			sock.write(JSON.stringify(result) + '\n');
-				voltage[0]=(JSON.parse(myJson).test.velocity);
-				voltage[1]=(JSON.parse(myJson).test.millis);
-				csvFileWriter.writeRecord(voltage);
-
-				values=JSON.parse(myJson).test;
-				for (var prop in values) {
-					if(values.hasOwnProperty(prop)) {
-						properties.push(prop);
-					}
-				}
-
-				console.log('Done');
-				jsonfile.writeFile(jsonFile, myJson, function (err) {
-					if(err != null) {
-						console.error(err)
-					}
-				})
-			});
+        parser.parseString(data, function (err, result) {
+            sock.write('received\n');
+            properties = [];
+            
+            myJson = (JSON.stringify(result));
+            var myJsonObj = JSON.parse(myJson);
+            
+            values = myJsonObj.test;
+            for (var prop in values) {
+                if(values.hasOwnProperty(prop)) {
+                    properties.push(prop);
+                }
+            }
+            
+            for (var i = 0; i < properties.length; i++) {
+                myJsonObj.test[properties[i]] = parseFloat(myJsonObj.test[properties[i]]);
+            }
+            
+            jsonObj.values.push(myJsonObj.test);
+            console.log(JSON.stringify(jsonObj.values, null, 2));
+        });
 	});
 
-
-	// Add a 'close' - "event handler" in this socket instance
 	sock.on('close', function(data) {
-		// closed connection
 		console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
 	});
-
-
 }).listen(PORT, HOST);
 
 app.listen(3001, function(){
@@ -83,18 +76,6 @@ app.listen(3001, function(){
 //			are in public/, including the index.html. Not critical to fix, tho
 app.get('/', function(req, res){
 	res.sendFile('index.html', { root : __dirname});
-});
-
-//	ADVICE: This is unnecessary and pretty inefficient. It's using Express routing
-//			(http://expressjs.com/en/guide/routing.html) utilizing HTTP verbs.
-//			Instead of it, use a websocket service like http://socket.io/ to send
-//			and recieve data in realtime.
-app.get('/data', function(req, res){
-	res.sendFile(jsonFile);
-});
-
-app.get('/data/voltage', function(req, res){
-	res.sendFile(voltageCsv);
 });
 
 console.log('Java socket server listening on ' + HOST +':'+ PORT);
