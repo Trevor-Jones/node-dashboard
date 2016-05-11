@@ -33,8 +33,9 @@ public class NodeJsEcho {
 			
 			JsonBuilderFactory factory = Json.createBuilderFactory(null);
 			 JsonObject value = factory.createObjectBuilder()
+				 .add("millis", System.currentTimeMillis())
 			     .add("velocity", num)
-			     .add("millis", System.currentTimeMillis())
+			     .add("hello", 12)
 			     .build();
 			 String message = value.toString();
 			 System.out.println(message);

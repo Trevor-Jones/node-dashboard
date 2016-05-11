@@ -15,11 +15,10 @@
 	<p>
 		<div id="chart" class="draggable"></div>
         <script>
-            var i;
             var myJson;
             var properties;
             var receivedJson;
-            var jsonObj = JSON.parse('{}');
+            var jsonObj = {};
             var initialized = false;
             
             var socket = io.connect('http://localhost:3002');
@@ -39,10 +38,11 @@
                     initialized = true;
                 }
                 
-                for (i = 0; i < properties.length; i++) {
+                for (var i = 0; i < properties.length; i++) {
                     receivedJson[properties[i]] = parseFloat(receivedJson[properties[i]]);
                     jsonObj[properties[i]].push(receivedJson[properties[i]]);
                 }
+//                alert(JSON.stringify(jsonObj));
             });
             
 //            alert(JSON.stringify(jsonObj));
@@ -50,6 +50,7 @@
 			var chart = c3.generate({
                 bindto: '#chart',
 				data: {
+                    x:'millis',
                     json: jsonObj
 				}
 			});
