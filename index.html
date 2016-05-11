@@ -15,29 +15,50 @@
 	<p>
 		<div id="chart" class="draggable"></div>
         <script>
+            var i;
             var myJson;
+            var properties;
+            var receivedJson;
+            var jsonObj = JSON.parse('{}');
+            var initialized = false;
             
             var socket = io.connect('http://localhost:3002');
             socket.on('json', function (data) {
+             
                 socket.emit('request', 'received');
-                myJson = data.values;
-                document.write(JSON.stringify(myJson));
+                
+                properties = [];
+                receivedJson = JSON.parse(data);
+                if(!initialized) {
+                    for (var prop in receivedJson) {
+                        if(receivedJson.hasOwnProperty(prop)) {
+                            properties.push(prop);
+                            jsonObj[prop] = [];
+                        }
+                    }
+                    initialized = true;
+                }
+                
+                for (i = 0; i < properties.length; i++) {
+                    receivedJson[properties[i]] = parseFloat(receivedJson[properties[i]]);
+                    jsonObj[properties[i]].push(receivedJson[properties[i]]);
+                }
             });
+            
+//            alert(JSON.stringify(jsonObj));
             
 			var chart = c3.generate({
                 bindto: '#chart',
 				data: {
-                    json: myJson,
-                    keys: {
-                        value: ['millis', 'velocity']
-                    }
+                    json: jsonObj
 				}
 			});
 
 			setInterval(function () {
 				chart.load({
-                    json: myJson
+                    json: jsonObj
 				});
+//                alert(JSON.stringify(jsonObj));
 			}, 1000);
 		</script>
 

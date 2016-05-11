@@ -7,6 +7,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+
 public class NodeJsEcho {
 	// socket object
 	private Socket socket = null;
@@ -21,12 +26,20 @@ public class NodeJsEcho {
 		String ip = "localhost";
 		int port = 3000;
 		client.socketConnect(ip, port);
-
 		
 		// writes and receives the message
 		for(int i = 0; i < 10000; i++) {
 			int num = (int)(Math.random() * 100);
-			String message = "<test><speed>5</speed><velocity>" + num + "</velocity><millis>" + System.currentTimeMillis() + "</millis></test>";
+			
+			JsonBuilderFactory factory = Json.createBuilderFactory(null);
+			 JsonObject value = factory.createObjectBuilder()
+			     .add("velocity", num)
+			     .add("millis", System.currentTimeMillis())
+			     .build();
+			 String message = value.toString();
+			 System.out.println(message);
+			
+//			String message = "<test><speed>5</speed><velocity>" + num + "</velocity><millis>" + System.currentTimeMillis() + "</millis></test>";
 	
 			System.out.println("Sending: " + message);
 			String returnStr = client.echo(message);
