@@ -13,54 +13,79 @@
 		<link rel="stylesheet" href="styles.css">
 	</head>
 	<p>
-		<div id="chart" class="draggable"></div>
+<!--		<div id="chart" class="draggable"></div>-->
+            
         <script>
             var myJson;
-            var properties;
+            var properties = [];
             var receivedJson;
             var jsonObj = {};
             var initialized = false;
+            var chartsCreated = false;
+            var chartDivs = [];
+            var charts = [];
             
             var socket = io.connect('http://localhost:3002');
             socket.on('json', function (data) {
              
                 socket.emit('request', 'received');
-                
-                properties = [];
                 receivedJson = JSON.parse(data);
+                
                 if(!initialized) {
-                    for (var prop in receivedJson) {
-                        if(receivedJson.hasOwnProperty(prop)) {
-                            properties.push(prop);
-                            jsonObj[prop] = [];
+                    var loopCounter = 0;
+                    for(var prop in receivedJson) {
+                        var id = "chart".concat(loopCounter);
+                        chartDivs.push(document.createElement("div"));
+                        chartDivs[loopCounter].id = id;
+                        chartDivs[loopCounter].className = "draggable";
+                        document.body.appendChild(chartDivs[loopCounter]);
+                        properties.push([]);
+                        jsonObj[prop] = {};
+                        for (var variables in receivedJson[prop]) {
+                            if(receivedJson[prop].hasOwnProperty(variables)) {
+                                properties[loopCounter].push(variables);
+                                jsonObj[prop][variables] = [];
+                            }
                         }
+//                        jsonObj[prop] = properties;
+                        loopCounter++;
                     }
                     initialized = true;
                 }
+                var iterator = 0;
+                for(var prop in receivedJson) {
+                    for (var u = 0; u < properties[iterator].length; u++) {
+                        receivedJson[prop][properties[iterator][u]] = parseFloat(receivedJson[prop][properties[iterator][u]]);
+                        jsonObj[prop][properties[iterator][u]].push(receivedJson[prop][properties[iterator][u]]);
+                    } 
+                    
+                    if(!chartsCreated) {
+                        charts[charts.length] = c3.generate({
+                            bindto: '#chart'.concat(charts.length),
+                            data: {
+                                x:'millis',
+                                json: jsonObj[prop]
+                            },
+                            transition: {
+                                duration: 300
+                            }
+                        });
+                    }
+                    iterator++;
+                }   
+                    chartsCreated = true;
+                    
+                    
                 
-                for (var i = 0; i < properties.length; i++) {
-                    receivedJson[properties[i]] = parseFloat(receivedJson[properties[i]]);
-                    jsonObj[properties[i]].push(receivedJson[properties[i]]);
-                }
-//                alert(JSON.stringify(jsonObj));
             });
             
-//            alert(JSON.stringify(jsonObj));
-            
-			var chart = c3.generate({
-                bindto: '#chart',
-				data: {
-                    x:'millis',
-                    json: jsonObj
-				}
-			});
-
-			setInterval(function () {
-				chart.load({
-                    json: jsonObj
-				});
-//                alert(JSON.stringify(jsonObj));
-			}, 1000);
+            setInterval(function() {
+                for(var i = 0; i < charts.length; i++) {
+                    charts[i].load({
+                        json: jsonObj["chart".concat(2)]
+                    });
+                }
+            }, 1000);
 		</script>
 
 		<script>

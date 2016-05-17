@@ -30,15 +30,26 @@ public class NodeJsEcho {
 		// writes and receives the message
 		for(int i = 0; i < 10000; i++) {
 			int num = (int)(Math.random() * 100);
+			int num2 = (int)(Math.random() * 100);
 			
 			JsonBuilderFactory factory = Json.createBuilderFactory(null);
-			 JsonObject value = factory.createObjectBuilder()
-				 .add("millis", System.currentTimeMillis())
-			     .add("velocity", num)
-			     .add("hello", 12)
+			JsonObject value = factory.createObjectBuilder()
+				 .add("chart0",factory.createObjectBuilder()
+					 .add("millis", System.currentTimeMillis())
+				     .add("velocity", num)
+				     .add("hello2", 12))
+				 .add("chart1",factory.createObjectBuilder()
+					 .add("millis", System.currentTimeMillis())
+				     .add("velocity", num2)
+				     .add("hello2", 17)
+				     .add("whatsup", 14))
+				 .add("chart2",factory.createObjectBuilder()
+					 .add("millis", System.currentTimeMillis())
+				     .add("velocity", num2)
+				     .add("hello", 17))
 			     .build();
-			 String message = value.toString();
-			 System.out.println(message);
+			String message = value.toString();
+			System.out.println(message);
 			
 //			String message = "<test><speed>5</speed><velocity>" + num + "</velocity><millis>" + System.currentTimeMillis() + "</millis></test>";
 	
