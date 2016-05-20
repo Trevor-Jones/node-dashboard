@@ -2,7 +2,6 @@ var net = require('net');
 var express = require('express');
 var app = express();
 var fs = require('fs');
-var csv = require('ya-csv');
 var path = require('path');
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
@@ -19,6 +18,7 @@ var receivedJson;
 var receivedData = "{}";
 var values;
 var properties = [];
+var newData;
 
 var initialized = false;
 
@@ -29,7 +29,10 @@ server.listen(3002);
 io.on('connection', function (socket) {
     socket.emit('json', receivedData);
     socket.on('request', function (data) {
-        socket.emit('json', receivedData);
+        if(newData) {
+            socket.emit('json', receivedData);
+            newData = false;
+        }
     });
 });
 
@@ -38,6 +41,8 @@ net.createServer(function(sock) {
 	sock.on('data', function(data) {
         sock.write('received\n');
         receivedData = data.toString('utf-8');
+        newData = true;
+        console.log(newData);
         
     });
 

@@ -9,11 +9,13 @@
 		<script src="interact.min.js"></script>
         <script src="socket.io.js"></script>
         <script src="graph.js"></script>
+        <script src="Chart.min.js"></script>
 		<title>JSON Table</title>
 		<link rel="stylesheet" href="styles.css">
 	</head>
 	<p>
 <!--		<div id="chart" class="draggable"></div>-->
+        <canvas id="myChart" width="40" height="40"></canvas>
             
         <script>
             var myJson;
@@ -24,11 +26,11 @@
             var chartsCreated = false;
             var chartDivs = [];
             var charts = [];
+            var myLineChart;
+            var ctx = document.getElementById('myChart').getContext('2d');
             
             var socket = io.connect('http://localhost:3002');
             socket.on('json', function (data) {
-             
-                socket.emit('request', 'received');
                 receivedJson = JSON.parse(data);
                 
                 if(!initialized) {
@@ -60,32 +62,50 @@
                     } 
                     
                     if(!chartsCreated) {
-                        charts[charts.length] = c3.generate({
-                            bindto: '#chart'.concat(charts.length),
+//                        charts[charts.length] = c3.generate({
+//                            bindto: '#chart'.concat(charts.length),
+//                            data: {
+//                                x:'millis',
+//                                json: jsonObj[prop]
+//                            },
+//                            transition: {
+//                                duration: 300
+//                            }
+//                        });
+                        
+                        myLineChart = new Chart(ctx, {
+                            type: 'line',
                             data: {
-                                x:'millis',
-                                json: jsonObj[prop]
-                            },
-                            transition: {
-                                duration: 300
+                                labels: jsonObj['chart0']['millis'],
+                                datasets: [{
+                                    data: jsonObj['chart0']['velocity']
+                                }]
                             }
                         });
                     }
                     iterator++;
                 }   
                     chartsCreated = true;
-                    
-                    
+                    alert(JSON.stringify(jsonObj['chart0']['velocity']));
+               myLineChart.data.datasets[0].data = jsonObj['chart0']['velocity'];
+                myLineChart.update();     
+             
                 
+                socket.emit('request', 'received');
             });
             
-            setInterval(function() {
-                for(var i = 0; i < charts.length; i++) {
-                    charts[i].load({
-                        json: jsonObj["chart".concat(2)]
-                    });
-                }
-            }, 1000);
+//            setInterval(function() {
+//                myLineChart.data.datasets[0].data = jsonObj['chart0']['velocity'];
+//                myLineChart.update();
+//            }, 1000);
+            
+//            setInterval(function() {
+////                for(var i = 0; i < charts.length; i++) {
+//                    charts[0].load({
+//                        json: jsonObj["chart".concat(2)]
+//                    });
+////                }
+//            }, 1000);
 		</script>
 
 		<script>

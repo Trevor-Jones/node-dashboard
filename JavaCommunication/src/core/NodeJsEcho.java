@@ -26,11 +26,15 @@ public class NodeJsEcho {
 		String ip = "localhost";
 		int port = 3000;
 		client.socketConnect(ip, port);
+		double variable = 0;
+		double num = Math.sin(variable);
 		
 		// writes and receives the message
 		for(int i = 0; i < 10000; i++) {
-			int num = (int)(Math.random() * 100);
+//			int num = (int)(Math.random() * 100);
 			int num2 = (int)(Math.random() * 100);
+			variable+=Math.PI/6;
+			num = Math.sin(variable);
 			
 			JsonBuilderFactory factory = Json.createBuilderFactory(null);
 			JsonObject value = factory.createObjectBuilder()
