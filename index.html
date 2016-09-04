@@ -1,46 +1,35 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src="table.js"></script>
-		<script src="jquery-2.2.3.js"></script>
-		<link href="c3.css" rel="stylesheet" type="text/css">
-		<script src="d3.min.js" charset="utf-8"></script>
-		<script src="c3.min.js"></script>
-		<script src="interact.min.js"></script>
         <script src="socket.io.js"></script>
-        <script src="graph.js"></script>
-        <script src="Chart.min.js"></script>
+        <script type="text/javascript" src="smoothie.js"></script>
 		<title>JSON Table</title>
 		<link rel="stylesheet" href="styles.css">
 	</head>
 	<p>
-<!--		<div id="chart" class="draggable"></div>-->
-        <canvas id="myChart" width="40" height="40"></canvas>
+        <canvas id="mycanvas" width="1000" height="200"></canvas>
             
         <script>
-            var myJson;
-            var properties = [];
             var receivedJson;
-            var jsonObj = {};
+            var properties = [];
             var initialized = false;
-            var chartsCreated = false;
-            var chartDivs = [];
-            var charts = [];
-            var myLineChart;
-            var ctx = document.getElementById('myChart').getContext('2d');
+            var jsonObj = {};
             
+            var smoothie = new SmoothieChart();
+            smoothie.streamTo(document.getElementById("mycanvas"), 1000);
+
+            // Data
+            var line1 = new TimeSeries();
+            var line2 = new TimeSeries();
+
             var socket = io.connect('http://localhost:3002');
             socket.on('json', function (data) {
                 receivedJson = JSON.parse(data);
-                
+
                 if(!initialized) {
                     var loopCounter = 0;
                     for(var prop in receivedJson) {
-                        var id = "chart".concat(loopCounter);
-                        chartDivs.push(document.createElement("div"));
-                        chartDivs[loopCounter].id = id;
-                        chartDivs[loopCounter].className = "draggable";
-                        document.body.appendChild(chartDivs[loopCounter]);
+                        var id = "chart".concat(loopCounter); 
                         properties.push([]);
                         jsonObj[prop] = {};
                         for (var variables in receivedJson[prop]) {
@@ -49,74 +38,27 @@
                                 jsonObj[prop][variables] = [];
                             }
                         }
-//                        jsonObj[prop] = properties;
                         loopCounter++;
                     }
                     initialized = true;
                 }
+
                 var iterator = 0;
                 for(var prop in receivedJson) {
                     for (var u = 0; u < properties[iterator].length; u++) {
                         receivedJson[prop][properties[iterator][u]] = parseFloat(receivedJson[prop][properties[iterator][u]]);
-                        jsonObj[prop][properties[iterator][u]].push(receivedJson[prop][properties[iterator][u]]);
                     } 
-                    
-                    if(!chartsCreated) {
-//                        charts[charts.length] = c3.generate({
-//                            bindto: '#chart'.concat(charts.length),
-//                            data: {
-//                                x:'millis',
-//                                json: jsonObj[prop]
-//                            },
-//                            transition: {
-//                                duration: 300
-//                            }
-//                        });
-                        
-                        myLineChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: jsonObj['chart0']['millis'],
-                                datasets: [{
-                                    data: jsonObj['chart0']['velocity']
-                                }]
-                            }
-                        });
-                    }
                     iterator++;
-                }   
-                    chartsCreated = true;
-                    alert(JSON.stringify(jsonObj['chart0']['velocity']));
-               myLineChart.data.datasets[0].data = jsonObj['chart0']['velocity'];
-                myLineChart.update();     
-             
-                
-                socket.emit('request', 'received');
-            });
-            
-//            setInterval(function() {
-//                myLineChart.data.datasets[0].data = jsonObj['chart0']['velocity'];
-//                myLineChart.update();
-//            }, 1000);
-            
-//            setInterval(function() {
-////                for(var i = 0; i < charts.length; i++) {
-//                    charts[0].load({
-//                        json: jsonObj["chart".concat(2)]
-//                    });
-////                }
-//            }, 1000);
-		</script>
+                }
 
-		<script>
-			interact('.draggable').draggable({
-                inertia: false,         
-                restrict: {             
-                    endOnly: true,
-                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-                },
-                autoScroll: true,     
-                onmove: dragMoveListener,   
+                line1.append(new Date().getTime(), receivedJson['chart0']['velocity']);
+                line2.append(new Date().getTime(), 0.5);
+
+                // Add to SmoothieChart
+                smoothie.addTimeSeries(line1);
+                smoothie.addTimeSeries(line2);
+
+                socket.emit('request', 'received');
             });
 		</script>
 	</p>

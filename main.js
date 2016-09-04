@@ -18,7 +18,7 @@ var receivedJson;
 var receivedData = "{}";
 var values;
 var properties = [];
-var newData;
+var newData = true;
 
 var initialized = false;
 
@@ -27,12 +27,14 @@ app.use(express.static('public'));
 server.listen(3002);
 
 io.on('connection', function (socket) {
+    console.log('SOCKET.IO CONNECTED');
     socket.emit('json', receivedData);
     socket.on('request', function (data) {
-        if(newData) {
+      //  if(newData) {
             socket.emit('json', receivedData);
-            newData = false;
-        }
+      //      newData = false;
+            console.log("Sent data");
+       // }
     });
 });
 
@@ -42,7 +44,6 @@ net.createServer(function(sock) {
         sock.write('received\n');
         receivedData = data.toString('utf-8');
         newData = true;
-        console.log(newData);
         
     });
 
