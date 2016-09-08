@@ -30,18 +30,16 @@ io.on('connection', function (socket) {
     console.log('SOCKET.IO CONNECTED');
     socket.emit('json', receivedData);
     socket.on('request', function (data) {
-      //  if(newData) {
-            socket.emit('json', receivedData);
-      //      newData = false;
-            console.log("Sent data");
-       // }
+        socket.emit('json', receivedData);
+        console.log(data);
     });
 });
 
-net.createServer(function(sock) {
+net.createServer(function(sock) { 
 	console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
 	sock.on('data', function(data) {
         sock.write('received\n');
+        console.log("Received");
         receivedData = data.toString('utf-8');
         newData = true;
         

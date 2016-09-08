@@ -1,65 +1,107 @@
 <!DOCTYPE html>
 <html>
-	<head>
         <script src="socket.io.js"></script>
         <script type="text/javascript" src="smoothie.js"></script>
 		<title>JSON Table</title>
 		<link rel="stylesheet" href="styles.css">
 	</head>
 	<p>
-        <canvas id="mycanvas" width="1000" height="200"></canvas>
             
         <script>
-            var receivedJson;
             var properties = [];
             var initialized = false;
-            var jsonObj = {};
-            
-            var smoothie = new SmoothieChart();
-            smoothie.streamTo(document.getElementById("mycanvas"), 1000);
+            var date = new Date();
 
+            var charts = [];
+            var chartDivs = [];
+
+            var jsonArray = [];
             // Data
-            var line1 = new TimeSeries();
-            var line2 = new TimeSeries();
+            var lines = [];
 
             var socket = io.connect('http://localhost:3002');
             socket.on('json', function (data) {
-                receivedJson = JSON.parse(data);
+                var receivedJson = JSON.parse(data);
 
                 if(!initialized) {
-                    var loopCounter = 0;
-                    for(var prop in receivedJson) {
-                        var id = "chart".concat(loopCounter); 
-                        properties.push([]);
-                        jsonObj[prop] = {};
-                        for (var variables in receivedJson[prop]) {
-                            if(receivedJson[prop].hasOwnProperty(variables)) {
-                                properties[loopCounter].push(variables);
-                                jsonObj[prop][variables] = [];
-                            }
-                        }
-                        loopCounter++;
-                    }
+                    initializeJson(receivedJson);
+                    initializeCharts();
                     initialized = true;
+                }
+
+                updateLines();
+
+                socket.emit('request', 'received');
+            });
+
+            function updateLines(receivedJson) {
+                var iterator = 0;
+                for(var prop in receivedJson) {
+                    for (var u = 0; u < properties[iterator].length; u++) {
+                        receivedJson[prop][properties[iterator][u]] = parseFloat(receivedJson[prop][properties[iterator][u]]);
+                        jsonArray[iterator][u] = parseFloat(receivedJson[prop][properties[iterator][u]]);
+                    } 
+                    iterator++;
+                }
+
+                for(var i = 0; i < jsonArray.length; i++) {
+                    for(var j = 0; j < properties[i].length; j++) {
+                        lines[i][j].append(date.getTime(), jsonArray[i][j]); 
+                    }
+                }
+            }
+
+            function initializeJson(receivedJson) {
+                var loopCounter = 0;
+                for(var prop in receivedJson) {
+                    var id = "chart".concat(loopCounter); 
+                    properties.push([]);
+                    jsonArray.push([]);
+                    for (var variables in receivedJson[prop]) {
+                        if(receivedJson[prop].hasOwnProperty(variables)) {
+                            properties[loopCounter].push(variables);
+                            jsonArray[loopCounter].push([]);
+                        }
+                    }
+                    loopCounter++;
+                }
+                console.log(jsonArray);
+                for(var i = 0; i < jsonArray.length; i++) {
+                    var id = "chart".concat(i);
+                    chartDivs.push(document.createElement("canvas"));
+                    chartDivs[chartDivs.length - 1].id = id;
+                    chartDivs[chartDivs.length - 1].width = 1000;
+                    chartDivs[chartDivs.length - 1].height = 200;
+                    document.body.appendChild(chartDivs[chartDivs.length - 1]);
                 }
 
                 var iterator = 0;
                 for(var prop in receivedJson) {
                     for (var u = 0; u < properties[iterator].length; u++) {
                         receivedJson[prop][properties[iterator][u]] = parseFloat(receivedJson[prop][properties[iterator][u]]);
+                        jsonArray[iterator][u] = parseFloat(receivedJson[prop][properties[iterator][u]]);
                     } 
                     iterator++;
                 }
+            }
 
-                line1.append(new Date().getTime(), receivedJson['chart0']['velocity']);
-                line2.append(new Date().getTime(), 0.5);
+            function initializeCharts() {
+                for(var i = 0; i < jsonArray.length; i++) { 
+                    var tempLines = [];
+                    for(var j = 0; j < properties[i].length; j++) {
+                        tempLines.push(new TimeSeries());
+                    }
 
-                // Add to SmoothieChart
-                smoothie.addTimeSeries(line1);
-                smoothie.addTimeSeries(line2);
-
-                socket.emit('request', 'received');
-            });
+                    lines.push(tempLines);
+                    charts[i] = new SmoothieChart();
+                    charts[i].streamTo(document.getElementById("chart".concat(i)), 1000);
+                    console.log(charts[i]);
+                    for(var j = 0; j < properties[i].length; j++) {
+                        lines[i][j].append(date.getTime(), jsonArray[i][j]);
+                        charts[i].addTimeSeries(lines[i][j]);
+                    }
+                }
+            }
 		</script>
 	</p>
 </html>

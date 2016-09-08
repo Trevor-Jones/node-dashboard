@@ -33,7 +33,7 @@ public class NodeJsEcho {
 		for(int i = 0; i < 10000; i++) {
 //			int num = (int)(Math.random() * 100);
 			int num2 = (int)(Math.random() * 100);
-			variable+=Math.PI/6;
+			variable+=Math.PI/60;
 			num = Math.sin(variable);
 			
 			JsonBuilderFactory factory = Json.createBuilderFactory(null);
@@ -47,17 +47,17 @@ public class NodeJsEcho {
 				     .add("whatsup", 14))
 				 .add("chart2",factory.createObjectBuilder()
 				     .add("velocity", num2)
-				     .add("hello", 17))
+				     .add("hello", 17)) 
 			     .build();
 			String message = value.toString();
 			System.out.println(message);
-			
+			 
 //			String message = "<test><speed>5</speed><velocity>" + num + "</velocity><millis>" + System.currentTimeMillis() + "</millis></test>";
 	
 			System.out.println("Sending: " + message);
 			String returnStr = client.echo(message);
 			System.out.println("Receiving: " + returnStr);
-			Thread.sleep(500);
+			Thread.sleep(75);
 		}
 		
 		client.closeSocket();
