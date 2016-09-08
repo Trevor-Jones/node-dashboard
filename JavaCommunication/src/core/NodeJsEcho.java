@@ -40,7 +40,7 @@ public class NodeJsEcho {
 			JsonObject value = factory.createObjectBuilder()
 				 .add("chart0",factory.createObjectBuilder()
 				     .add("velocity", num)    
-				     .add("hello2", 12))
+				     .add("hello2", 1))
 				 .add("chart1",factory.createObjectBuilder() 
 				     .add("velocity", num2)
 				     .add("hello2", 17) 
@@ -48,6 +48,9 @@ public class NodeJsEcho {
 				 .add("chart2",factory.createObjectBuilder()
 				     .add("velocity", num2)
 				     .add("hello", 17)) 
+				 .add("hello",factory.createObjectBuilder()
+				     .add("velocity", 0.7)
+				     .add("hello", num)) 
 			     .build();
 			String message = value.toString();
 			System.out.println(message);

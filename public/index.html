@@ -9,7 +9,6 @@
         <script>
             var properties = [];
             var initialized = false;
-            var date = new Date();
 
             var charts = [];
             var chartDivs = [];
@@ -45,7 +44,7 @@
 
                 for(var i = 0; i < jsonArray.length; i++) {
                     for(var j = 0; j < properties[i].length; j++) {
-                        lines[i][j].append(date.getTime(), jsonArray[i][j]); 
+                        lines[i][j].append(new Date().getTime(), jsonArray[i][j]);
                     }
                 }
             }
@@ -93,9 +92,9 @@
 
                     lines.push(tempLines);
                     charts[i] = new SmoothieChart();
-                    charts[i].streamTo(document.getElementById("chart".concat(i)), 1000);
+                    charts[i].streamTo(document.getElementById("chart".concat(i)), 500);
                     for(var j = 0; j < properties[i].length; j++) {
-                        lines[i][j].append(date.getTime(), jsonArray[i][j]);
+                        lines[i][j].append(new Date().getTime(), jsonArray[i][j]);
                         charts[i].addTimeSeries(lines[i][j]);
                     }
                 }

@@ -58,7 +58,7 @@ app.listen(3001, function(){
 // 	ADVICE: This is sorta dumb: In a typical application, all of the public files
 //			are in public/, including the index.html. Not critical to fix, tho
 app.get('/', function(req, res){
-	res.sendFile('index.html', { root : __dirname});
+	res.sendFile('public/index.html', { root : __dirname});
 });
 
 console.log('Java socket server listening on ' + HOST +':'+ PORT);
