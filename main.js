@@ -12,6 +12,7 @@ if(process.argv.length > 2) {
 else {
     var HOST = 'localhost';
 }
+
 var PORT = 3000;
 
 var receivedJson;
@@ -31,7 +32,6 @@ io.on('connection', function (socket) {
     socket.emit('json', receivedData);
     socket.on('request', function (data) {
         socket.emit('json', receivedData);
-        console.log(data);
     });
 });
 
@@ -39,7 +39,6 @@ net.createServer(function(sock) {
 	console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
 	sock.on('data', function(data) {
         sock.write('received\n');
-        console.log("Received");
         receivedData = data.toString('utf-8');
         newData = true;
         

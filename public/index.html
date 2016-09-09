@@ -1,11 +1,64 @@
 <!DOCTYPE html>
 <html>
+    <head>
         <script src="socket.io.js"></script>
-        <script type="text/javascript" src="smoothie.js"></script>
-		<title>JSON Table</title>
-		<link rel="stylesheet" href="styles.css">
+        <script src="smoothie.js"></script>
+        <script src="vue.js"></script>
+        <script src="vue-strap.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">  
+    	<title>JSON Table</title>
 	</head>
-	<p>           
+	<body>   
+        <div id="app" style="width: 1000px; display:inline-block;">
+            <tabs>
+                <tab header="Charts" id="chartTab">
+                </tab>
+                <tab header="two" id="tabchart1">
+                    Whats up dude
+                </tab>
+            </tabs>
+        </div>
+
+        <div id="dropdown" style="width: 500px; display:inline-block">
+          <v-select :value.sync="val" :options="options" name="animals[]" close-on-select justified></v-select>
+        </div>
+
+        <script>
+            new Vue({
+                components: {
+                    vSelect: VueStrap.select,
+                    vOption: VueStrap.option
+                },
+                el: "#dropdown",
+                data: {
+                    showRight: false,
+                    showTop: false,
+                    options: [
+                      {value: 1, label: 'Auto 1'},
+                      {value: 2, label: 'Auto 2'},
+                      {value: 3, label: 'Auto 3'},
+                      {value: 4, label: 'Auto 4'},
+                      {value: 5, label: 'Auto 5'},
+                      {value: 6, label: 'Auto 6'},
+                      {value: 7, label: 'Auto 7'},
+                      {value: 8, label: 'Auto 8'}
+                    ],
+                    val: 1
+                }
+            })
+
+            new Vue({
+                components: {
+                    tabs: VueStrap.tabset,
+                    tab: VueStrap.tab,
+                },
+                el: "#app",
+                data: {
+                    options: []
+                }
+            })
+        </script> 
+
         <script>
             var properties = [];
             var initialized = false;
@@ -63,14 +116,13 @@
                     }
                     loopCounter++;
                 }
-                console.log(jsonArray);
                 for(var i = 0; i < jsonArray.length; i++) {
                     var id = "chart".concat(i);
                     chartDivs.push(document.createElement("canvas"));
                     chartDivs[chartDivs.length - 1].id = id;
                     chartDivs[chartDivs.length - 1].width = 1000;
                     chartDivs[chartDivs.length - 1].height = 200;
-                    document.body.appendChild(chartDivs[chartDivs.length - 1]);
+                    document.getElementById("chartTab").appendChild(chartDivs[chartDivs.length - 1]);
                 }
 
                 var iterator = 0;
@@ -100,5 +152,5 @@
                 }
             }
 		</script>
-	</p>
+	</body>
 </html>
